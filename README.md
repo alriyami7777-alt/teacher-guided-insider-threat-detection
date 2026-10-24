@@ -28,17 +28,16 @@ The final model is called **TRACE** in the revised manuscript (internal label TA
 
 | Paper item | Repository location |
 |---|---|
-| Pre-registered user-disjoint holdout protocol, with Amendment 1 (TRAIN + VALIDATION periods; r5.2 TEST sealed) and Amendment 2 (eight additional baselines), each SHA-256 receipted | `revision_r2/holdout/PREREGISTRATION_R2_HOLDOUT.md` |
+| Pre-registered user-disjoint holdout protocol, with Amendment 1 (TRAIN + VALIDATION periods; r5.2 TEST partition not used) and Amendment 2 (eight additional baselines), each SHA-256 receipted | `revision_r2/holdout/PREREGISTRATION_R2_HOLDOUT.md` |
 | Split receipt (counts and list hashes only) | `revision_r2/holdout/SPLIT_RECEIPT.json` |
 | Training logs and frozen-model hashes | `revision_r2/holdout/TRAINING_LOG.csv`, `revision_r2/holdout/phase4/TRAINING_LOG_PHASE4.csv`, `MODELS_FROZEN_PHASE4.json` |
 | Table 6 / Fig. 6, Section IV-C (unseen users, 17 models, all views) | `revision_r2/holdout/phase4/HOLDOUT_RESULTS.csv`, `HOLDOUT_CONTRASTS.csv`, `CHATGPT_PHASE4_REPORT.md`; plotting script `revision_r2/holdout/figures/plot_holdout.py` |
 | Integrated Gradients and TreeSHAP faithfulness: validation cohort (Section IV-I, Fig. 9); unseen users (Section IV-G, Table 8, Fig. 8) | `revision_r2/explanation/` (validation cohort), `revision_r2/explanation_holdout/` and `revision_r2/phase6b/` (unseen users) |
 | Eight seeds on the unseen users (Fig. 7, Section IV-C) | `revision_r2/phase8/` (Q1) |
 | Frozen evidence behind every other table and figure (redacted: user IDs replaced by `U_` + first 10 hex digits of SHA-256) | `revision_r2/evidence/` with `EXPORT_MANIFEST.csv` and `FINAL_SCAN.json` |
-| Supplementary material source | `revision_r2/Supplementary_Material.tex` |
 | Disclosures (model-selection history, AI use, exclusions) | `revision_r2/DISCLOSURES.md`, `revision_r2/EXCLUDED_FROM_PUBLIC_COPY.md` |
 
-CERT data, answer files, raw user identifiers and model checkpoints are not distributed. Some run logs contain local Windows paths of the authors' workstation; they carry no data.
+CERT data, answer files, raw user identifiers and model checkpoints (apart from the seed-42 checkpoints in `revision_r2/holdout/checkpoints_seed42/`) are not distributed. Some run logs contain local Windows paths of the authors' workstation; they carry no data.
 
 ## Reproduce the unseen-user result (seed 42)
 
@@ -183,8 +182,8 @@ development users' TRAIN windows (48.352).
 Component roles, as separated by the frozen factorial:
 
 - Teacher-informed initialisation remains an important optimisation condition.
-  Randomly initialised students were not rescued under the evaluated
-  teacher-guided protocol.
+  Students trained from a random start did not recover under this protocol,
+  so TRACE starts from its matched teacher.
 - Ensemble-teacher prediction guidance, taken with equal weight from the three
   frozen teachers, supplies the supported clean predictive improvement beyond
   teacher-informed initialisation.
@@ -203,7 +202,7 @@ and XGBoost remain strong engineered-tabular comparators.
 - **CERT r5.2** — historical guarded-reference evidence, plus the final
   train/validation evidence.
 - **CERT r5.1, r6.1 and r6.2** — zero-shot cross-release evaluation of models
-  trained on r5.2 (Section IV-M, Table 12; `revision_r2/phase5/`; r6.1 also in
+  trained on r5.2 (Section IV-M, Table 13; `revision_r2/phase5/`; r6.1 also in
   `evidence/`).
 - **CERT r6.2** — additionally, exploratory training that includes r6.2:
   pooled r5.2 + r6.2 and within-r6.2 training on user-grouped splits
@@ -211,7 +210,9 @@ and XGBoost remain strong engineered-tabular comparators.
 
 ## Key supported findings
 
-**Final CERT r5.2 validation, mean over seeds 42, 52 and 62.**
+**Unseen users (pre-registered, confirmatory):** TRACE 0.712 vs task-only control 0.692 (+0.020 [0.008, 0.040]); XGBoost-40 0.824; TRACE found 24 of 25 insiders in each pre-registered seed (Section IV-C, Table 6).
+
+**Final CERT r5.2 validation (exploratory), mean over seeds 42, 52 and 62.**
 
 | Model | Mean validation PR-AUC |
 |---|---|
@@ -255,7 +256,7 @@ This section answers the reviewers' request that the repository support every an
 | r5.2 validation factorial (Table 5; component contrasts in Section IV-E) | `editor012-teacher-anchor-rescue` @ `4bcf522` : `review/editor012_teacher_anchor_rescue/` | `results/tables/r52_validation_all_models.csv`; the earlier ten-seed validation extension, not reported in the R2 manuscript, is kept in `results/tables/ten_seed_extension_extra_seeds.csv` |
 | Formulation search before the factorial (8 candidates) | same : `01_inner_anchor_search/` | `results/tables/formulation_search_editor012_inner.csv` |
 | XGBoost-40 / RF-40 on the same r5.2 validation partition | `editor015-residual-complementarity` @ `d8e1d04` : `review/editor007a_post006e_diagnostics/EDITOR007A_R52_VALIDATION_PARITY.csv` | `results/tables/r52_validation_all_models.csv` |
-| CERT r5.1 and r6.2, historical frozen pre-TA2 family (Table 12 itself uses TRACE: `revision_r2/phase5/`) | same : `review/editor007d_cross_version_synthesis/` | `results/tables/cross_version_r51_r62_frozen_family.csv` |
+| CERT r5.1 and r6.2, historical frozen pre-TA2 family (Table 13 itself uses TRACE: `revision_r2/phase5/`) | same : `review/editor007d_cross_version_synthesis/` | `results/tables/cross_version_r51_r62_frozen_family.csv` |
 | Non-overlapping and endpoint analyses | `editor029-endpoint-dependence-aware` @ `28475d5` : `review/editor029_endpoint_dependence/` | `evidence/` (redacted export) |
 | CERT r6.1 cross-release | `editor024-r61-final-confirmation` @ `23794a7` : `review/editor024_r61_final_confirmation/` | `evidence/` (redacted export) |
 | Explanation and degraded-input analyses | `editor017-…` @ `c75321a`, `editor023-…` @ `a480fa2` | `evidence/` (redacted export) |
@@ -278,7 +279,7 @@ This section answers the reviewers' request that the repository support every an
 - Missing-source and Gaussian-noise experiments are controlled degraded-input
   and data-quality sensitivity analyses, not adversarial robustness experiments.
   Local evasion and poisoning attacks are reported separately (Section IV-K,
-  Table 10; `revision_r2/phase9/`).
+  Table 11; `revision_r2/phase9/`).
 - Overlapping sequence windows are correlated observations.
 
 See `KNOWN_LIMITATIONS.md` for the complete list.

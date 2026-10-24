@@ -1,6 +1,6 @@
 ﻿# Study Status
 
-Last consolidated status: 22 October 2026.
+Last consolidated status: 25 October 2026.
 
 ## Submission status
 
@@ -8,11 +8,10 @@ Last consolidated status: 22 October 2026.
 - Original prescreened manuscript: Access-2026-37987
 - Revised title: Teacher-Guided Differentiable Sequence–Ensemble Learning for
   Explainable Insider Threat Detection
-- Status: reviewer comments received; second-round revision (R2) in
-  preparation on branch `ieee-access-r2-revision`. New R2 evidence is in
-  `revision_r2/` (see the README section "Revision R2: where to find each
-  result"). The sections below record the evidence state of the August 2026
-  resubmission.
+- Status: R2 revision submitted October 2026; the cited version is tag
+  `ieee-access-r2` (commit `ff55cc5`). New R2 evidence is in `revision_r2/`
+  (see the README section "Revision R2: where to find each result"). The
+  sections below record the evidence state of the August 2026 resubmission.
 
 ## Scope
 

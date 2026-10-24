@@ -1,12 +1,14 @@
 cff-version: 1.2.0
-message: "Please cite the associated paper when using this repository."
+message: "If you use this repository, please cite it as below. The associated paper is under review at IEEE Access."
 title: "Teacher-Guided Differentiable Sequence–Ensemble Learning for Explainable Insider Threat Detection"
 type: software
 authors:
   - family-names: "Alriyami"
     given-names: "Qasim Mohamed Muhanna"
-date-released: "2026-07-27"
-version: "0.1.0"
+  - family-names: "Mohamad"
+    given-names: "Mohd Murtadha bin"
+date-released: "2026-10-25"
+version: "ieee-access-r2"
 # Renamed from teacher-anchored-insider-threat-detection on 2026-10-22; the old URL redirects.
 repository-code: "https://github.com/alriyami7777-alt/teacher-guided-insider-threat-detection"
 license: "MIT"
