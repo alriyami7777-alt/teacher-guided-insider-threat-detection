@@ -2,7 +2,7 @@
 
 These scripts are the CERT r5.2 preparation pipeline that produced the paper's day-level table on 23 July 2026 (run finished 08:38 UTC; stages match, label_events, unified_stream, daily_intervals, densify, sliding_windows, sequence_tensors). They are copied from the preparation project's `scripts/` folder as it stands now. Two of them (`cert_common13_pipeline.py`, `prepare_cert_common13_pipeline.py`) were last modified at 11:15 UTC the same day, after that run, and no hash of the version that ran was recorded. Whether they still produce the same table is tested downstream: `reproduce_unseen_seed42.py build` compares the rebuilt development tensors with the SHA-256 hashes recorded in `../DATA_MANIFEST.json` when the paper's tensors were made.
 
-For the unseen-user reproduction only the first five stages are needed. The README's step 3 runs those five, so no window or tensor file is built for any period, and none for the TEST period. The paper's split boundaries (TRAIN to 2011-02-18, VALIDATION to 2011-04-10) come from `TRAIN_FRAC = 0.80` and `VAL_FRAC = 0.10` of the 517 calendar days in `cert_common13_pipeline.py`.
+For the unseen-user reproduction only the first five stages are needed. The README's step 3 runs those five, so no window or tensor file is built for any period. The paper's split boundaries (TRAIN to 2011-02-18, VALIDATION to 2011-04-10) come from `TRAIN_FRAC = 0.80` and `VAL_FRAC = 0.10` of the 517 calendar days in `cert_common13_pipeline.py`.
 
 **Change made for the public copy (24 Oct 2026).** In `dataset_registry.py`, the authors' machine-specific Windows paths were removed:
 - `FORBIDDEN_RAW_SOURCES` (a blocklist of local folders) is now empty.

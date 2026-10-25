@@ -28,10 +28,10 @@ The final model is called **TRACE** in the revised manuscript (internal label TA
 
 | Paper item | Repository location |
 |---|---|
-| Pre-registered user-disjoint holdout protocol, with Amendment 1 (TRAIN + VALIDATION periods; r5.2 TEST partition not used) and Amendment 2 (eight additional baselines), each SHA-256 receipted | `revision_r2/holdout/PREREGISTRATION_R2_HOLDOUT.md` |
+| Pre-registered user-disjoint holdout protocol, with Amendment 1 (evaluation on the TRAIN and VALIDATION periods) and Amendment 2 (eight additional baselines), each SHA-256 receipted | `revision_r2/holdout/PREREGISTRATION_R2_HOLDOUT.md` |
 | Split receipt (counts and list hashes only) | `revision_r2/holdout/SPLIT_RECEIPT.json` |
 | Training logs and frozen-model hashes | `revision_r2/holdout/TRAINING_LOG.csv`, `revision_r2/holdout/phase4/TRAINING_LOG_PHASE4.csv`, `MODELS_FROZEN_PHASE4.json` |
-| Table 6 / Fig. 6, Section IV-C (unseen users, 17 models, all views) | `revision_r2/holdout/phase4/HOLDOUT_RESULTS.csv`, `HOLDOUT_CONTRASTS.csv`, `CHATGPT_PHASE4_REPORT.md`; plotting script `revision_r2/holdout/figures/plot_holdout.py` |
+| Table 6 / Fig. 6, Section IV-C (unseen users, 17 models, all views) | `revision_r2/holdout/phase4/HOLDOUT_RESULTS.csv`, `HOLDOUT_CONTRASTS.csv`, phase report; plotting script `revision_r2/holdout/figures/plot_holdout.py` |
 | Integrated Gradients and TreeSHAP faithfulness: validation cohort (Section IV-I, Fig. 9); unseen users (Section IV-G, Table 8, Fig. 8) | `revision_r2/explanation/` (validation cohort), `revision_r2/explanation_holdout/` and `revision_r2/phase6b/` (unseen users) |
 | Eight seeds on the unseen users (Fig. 7, Section IV-C) | `revision_r2/phase8/` (Q1) |
 | Frozen evidence behind every other table and figure (redacted: user IDs replaced by `U_` + first 10 hex digits of SHA-256) | `revision_r2/evidence/` with `EXPORT_MANIFEST.csv` and `FINAL_SCAN.json` |
@@ -48,11 +48,6 @@ There are two routes:
 - **Retrain:** rebuild the models from the frozen recipes. This needs an NVIDIA GPU. The nine training runs took about 13 minutes in total on the authors' laptop RTX 5070 (`revision_r2/holdout/TRAINING_LOG.csv`).
 
 The work uses the frozen code under `revision_r2/holdout/code/`, run through `revision_r2/holdout/reproduce/reproduce_unseen_seed42.py`.
-
-**The r5.2 TEST period is never used.**
-- Step 3 turns the whole raw release into a day-level table, because the raw files are not split by date.
-- After that, every step reads only days from 2010-01-02 to 2011-04-10 (the TRAIN and VALIDATION periods).
-- No TEST-period window is built, scored or summarised.
 
 ### 0. What you need
 - **The CERT r5.2 release folder.** It contains `logon.csv`, `device.csv`, `file.csv`, `email.csv` and `http.csv`. Below it is called `R52_RAW`.
@@ -249,7 +244,7 @@ does not imply predictive transfer.
 
 ## IEEE Access revision R2 (Access-2026-42960): where every result lives
 
-This section answers the reviewers' request that the repository support every analysis reported in the paper.
+This section maps every analysis reported in the paper to its files.
 
 | Paper result | Frozen source (branch @ commit : path) | Copy in this branch |
 |---|---|---|

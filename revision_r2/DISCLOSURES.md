@@ -1,6 +1,6 @@
 # Disclosures for the IEEE Access revision (Access-2026-42960)
 
-This file reports, in one place, results and selection steps that exist in this repository but were **not reported in the submitted manuscript**. Reviewer 3 asked for them to be disclosed. Every number below is copied from a frozen evidence file. The file path is given, and the branch is `editor015-residual-complementarity` unless stated otherwise. Machine-readable copies are in `results/tables/`.
+This file lists results and selection steps that the July 2026 manuscript did not report. The R2 manuscript now reports D1 (Table 5), D2 (Section III-E, Development history) and the r5.1 and r6.2 results for TRACE (Table 13); D3 and D4 record earlier runs for completeness.
 
 ## D1. XGBoost-40 on the same r5.2 validation partition
 
@@ -29,7 +29,7 @@ Sources: `review/editor007a_post006e_diagnostics/EDITOR007A_R52_VALIDATION_PARIT
 
 ## D3. Cross-release runs on CERT r5.1 and r6.2 (historical, frozen pre-TA2 model family)
 
-The frozen pre-repair family (teacher-frozen ODST, C2, C5, attention–linear, RF-40, XGBoost-40; 18 models) was evaluated once on r5.1 and r6.2. Frozen r5.2 thresholds were used, with no target-side fitting. **TA2 itself was not evaluated on r5.1 or r6.2.**
+The frozen pre-repair family (teacher-frozen ODST, C2, C5, attention–linear, RF-40, XGBoost-40; 18 models) was evaluated once on r5.1 and r6.2. Frozen r5.2 thresholds were used, with no target-side fitting. These are earlier models; TRACE itself on r5.1, r6.1 and r6.2 is in Table 13 of the R2 manuscript.
 
 | Release | Windows | Positives | Prevalence | Neural mean PR-AUC (range of family means) | XGBoost-40 | RF-40 | Recorded verdict |
 |---|---|---|---|---|---|---|---|

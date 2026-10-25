@@ -38,7 +38,7 @@ reproducibility contracts.
 ## `review/`
 
 Submission readiness, manuscript changelog, claim-to-evidence audits,
-limitations and reviewer-facing preparation.
+limitations and submission preparation.
 
 ## `submission/`
 
