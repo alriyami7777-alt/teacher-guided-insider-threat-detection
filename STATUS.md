@@ -10,8 +10,7 @@ Last consolidated status: 25 October 2026.
   Explainable Insider Threat Detection
 - Status: R2 revision submitted October 2026; the cited version is tag
   `ieee-access-r2` (commit `ff55cc5`). New R2 evidence is in `revision_r2/`
-  (see the README section "Revision R2: where to find each result"). The
-  sections below record the evidence state of the August 2026 resubmission.
+  (see the README section "Revision R2: where to find each result").
 
 ## Current evidence (R2)
 

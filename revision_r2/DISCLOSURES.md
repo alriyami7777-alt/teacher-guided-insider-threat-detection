@@ -1,6 +1,6 @@
 # Disclosures for the IEEE Access revision (Access-2026-42960)
 
-This file lists results and selection steps that the July 2026 manuscript did not report. The R2 manuscript now reports D1 (Table 5), D2 (Section III-E, Development history) and the r5.1 and r6.2 results for TRACE (Table 13); D3 and D4 record earlier runs for completeness.
+This file lists results and selection steps that the July 2026 manuscript did not report. File paths below are on branch `editor015-residual-complementarity` unless stated otherwise; machine-readable copies are in `results/tables/`. The R2 manuscript now reports D1 (Table 5), D2 (Section III-E, Development history) and the r5.1 and r6.2 results for TRACE (Table 13); D3 and D4 record earlier runs for completeness.
 
 ## D1. XGBoost-40 on the same r5.2 validation partition
 
@@ -19,7 +19,7 @@ On the same 64,000-window r5.2 VALIDATION partition (728 positives), the enginee
 XGBoost-40 − TA2 = **+0.023711** (mean of per-seed differences +0.021512 / +0.031269 / +0.018352). TA2's validation PR-AUC is also the criterion that selected its checkpoint, so this comparison, if anything, favours TA2.
 Sources: `review/editor007a_post006e_diagnostics/EDITOR007A_R52_VALIDATION_PARITY.csv`; `review/editor012_teacher_anchor_rescue/02_factorial_confirmation/EDITOR012_FACTORIAL_RESULTS.csv`; L1 from `review/editor013_odst_value_proof/02_validation_confirmation/EDITOR013_VALIDATION_RESULTS.csv`.
 
-## D2. Formulation search before the Table 4 factorial
+## D2. Formulation search before the Table 5 factorial
 
 1. **Inner anchor search (EDITOR-012).** Six prediction-guidance formulations (A0–A5) were trained **without** the route term. The route term (λ = 0.5) was then added to the best two (A0, A3). That makes **8 candidates** in total. All were trained on seed 42 only, from the seed-42 teacher checkpoint. Training used INNER_TRAIN and selection used INNER_SELECT, a per-user chronological 80/20 calendar split of r5.2 TRAIN (622,000 / 128,000 windows; 38,000 boundary windows dropped). Official r5.2 VALIDATION was not used. Every candidate's score is in `results/tables/formulation_search_editor012_inner.csv`. **No candidate beat the incumbent A0 (ET1) formulation (0.936892), so none was promoted.** On this inner split, adding the route term to A0 *lowered* the score (0.933882). The route term in TA2 was retained on the official validation partition (step 3).
 2. **Upstream searches.** A0 (equal-weight ensemble logit MSE, λ = 0.5) and the ODST-046 head (2 layers × 4 trees, depth 4) were fixed by earlier campaigns, EDITOR-010 (ODST grid) and EDITOR-011 (ODST-046 lock and T-OPT teachers). Their result folders are being published on their own branches (see the README evidence map).
