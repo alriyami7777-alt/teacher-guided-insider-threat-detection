@@ -89,7 +89,7 @@ def load_insiders_for_version(answers_dir: Path, version: str) -> pd.DataFrame:
 
 
 def user_id_from_per_user_filename(path: Path, spec: DatasetSpec) -> str:
-    # e.g. r5.2-1-ALT1465.csv
+    # e.g. r5.2-1-<USERID>.csv
     pattern = re.compile(
         rf"{re.escape(spec.release_tag)}-\d+-([A-Z0-9]+)\.csv$",
         re.IGNORECASE,

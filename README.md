@@ -1,83 +1,303 @@
-# Teacher-Anchored Differentiable Sequence-Ensemble Learning for Insider Threat Detection
+# Teacher-Guided Differentiable Sequence–Ensemble Learning for Explainable Insider Threat Detection
 
-> [!WARNING]
-> This repository supports a manuscript under active revision. Results,
-> documentation, reproducibility material, and supplementary files are not yet
-> submission-final. Frozen implementation evidence takes precedence over
-> provisional manuscript wording.
+This repository supports the IEEE Access submission **Access-2026-42960**,
+*Teacher-Guided Differentiable Sequence–Ensemble Learning for Explainable
+Insider Threat Detection* (Alriyami and Mohamad). It holds the code, protocols,
+frozen results and provenance records for that paper only. Results added for
+the second-round revision (R2) are in `revision_r2/`.
 
-This repository is a compact research and reproducibility companion for a PhD study on insider threat detection in enterprise activity logs. It is deliberately separated from the full experimental workspace.
+The repository was renamed on 22 October 2026 from
+`teacher-anchored-insider-threat-detection` to
+`teacher-guided-insider-threat-detection` to match the revised manuscript
+title. GitHub redirects the old URL, so links in earlier versions of the
+manuscript still resolve.
 
-The repository is intended to share:
+The repository shares reviewed model and evaluation code, experiment protocols
+and configuration templates, result summaries and provenance records,
+explanation and robustness procedures, and documented limitations.
 
-- reviewed model and evaluation code;
-- experiment protocols and configuration templates;
-- result summaries and provenance records;
-- explanation and robustness procedures;
-- limitations and planned follow-up experiments.
+It does **not** distribute CERT datasets, answer files, raw user identifiers (exported evidence uses pseudonyms), model
+checkpoints (except the three seed-42 checkpoints in `revision_r2/holdout/checkpoints_seed42/`, published for the
+unseen-user check), large prediction arrays, or private organisational material.
 
-It does **not** distribute CERT datasets, answer files, user identifiers, model checkpoints, large prediction arrays, or private organisational material.
+## Revision R2 (IEEE Access, Access-2026-42960): where to find each result
 
-## Research objectives and Chapter 3 phases
+**Table-by-table and figure-by-figure map:** [`revision_r2/RESULTS_MAP.md`](revision_r2/RESULTS_MAP.md) lists every table and figure in the R2 manuscript by LaTeX label, with its output files, producing code, seeds and settings. New R2 analyses are in `revision_r2/phase5/` (cross-release, robustness, operational, calibration, statistics), `revision_r2/phase6/` (TRACE re-runs), `revision_r2/phase6b/` (representation and explanation tests on unseen users), `revision_r2/phase6c/`, `revision_r2/phase7/` (case-level and operational analyses) and `revision_r2/phase8/` (further seeds, routing and explanation checks, input monitoring), `revision_r2/phase9/` (limitation tests L1–L8: target-side restandardisation, feature removal, lead time, route interventions, seed averaging, attribution baselines, evasion and poisoning), `revision_r2/phase10/` (CERT r6.2 cross-release tests: threshold-only refitting and training within r6.2 on a user-disjoint split) and `revision_r2/phase11/` (CERT r6.2 on its own terms: pooled and within-release training, four-fold user-level evaluation and daily alert budgets), `revision_r2/analysis/` (efficiency profile, feature-study record) and `revision_r2/paper_figures/` (plotting scripts). Each phase folder has its report, CSVs, figures and `reproducibility_code/`; the pre-push audit is `revision_r2/PUBLIC_RELEASE_AUDIT_PHASE5_6.md`.
 
-| Research objective | Repository area | Chapter 3 phase |
+The final model is called **TRACE** in the revised manuscript (internal label TA2/F11 in the evidence files).
+
+| Paper item | Repository location |
+|---|---|
+| Pre-registered user-disjoint holdout protocol, with Amendment 1 (evaluation on the TRAIN and VALIDATION periods) and Amendment 2 (eight additional baselines), each SHA-256 receipted | `revision_r2/holdout/PREREGISTRATION_R2_HOLDOUT.md` |
+| Split receipt (counts and list hashes only) | `revision_r2/holdout/SPLIT_RECEIPT.json` |
+| Training logs and frozen-model hashes | `revision_r2/holdout/TRAINING_LOG.csv`, `revision_r2/holdout/phase4/TRAINING_LOG_PHASE4.csv`, `MODELS_FROZEN_PHASE4.json` |
+| Table 6 / Fig. 6, Section IV-C (unseen users, 17 models, all views) | `revision_r2/holdout/phase4/HOLDOUT_RESULTS.csv`, `HOLDOUT_CONTRASTS.csv`, phase report; plotting script `revision_r2/holdout/figures/plot_holdout.py` |
+| Integrated Gradients and TreeSHAP faithfulness: validation cohort (Section IV-I, Fig. 9); unseen users (Section IV-G, Table 8, Fig. 8) | `revision_r2/explanation/` (validation cohort), `revision_r2/explanation_holdout/` and `revision_r2/phase6b/` (unseen users) |
+| Eight seeds on the unseen users (Fig. 7, Section IV-C) | `revision_r2/phase8/` (Q1) |
+| Frozen evidence behind every other table and figure (redacted: user IDs replaced by `U_` + first 10 hex digits of SHA-256) | `revision_r2/evidence/` with `EXPORT_MANIFEST.csv` and `FINAL_SCAN.json` |
+| Disclosures (model-selection history, AI use, exclusions) | `revision_r2/DISCLOSURES.md`, `revision_r2/EXCLUDED_FROM_PUBLIC_COPY.md` |
+
+CERT data, answer files, raw user identifiers and model checkpoints (apart from the seed-42 checkpoints in `revision_r2/holdout/checkpoints_seed42/`) are not distributed. Some run logs contain local Windows paths of the authors' workstation; they carry no data.
+
+## Reproduce the unseen-user result (seed 42)
+
+This section reproduces the paper's unseen-user evaluation (`tab:holdout`) for seed 42. It covers TRACE, the task-only control (F00) and XGBoost-40, each scored on the 500 held-out CERT r5.2 users.
+
+There are two routes:
+- **Load:** score the published seed-42 checkpoints. After the data preparation (step 3), this runs on a CPU in minutes.
+- **Retrain:** rebuild the models from the frozen recipes. This needs an NVIDIA GPU. The nine training runs took about 13 minutes in total on the authors' laptop RTX 5070 (`revision_r2/holdout/TRAINING_LOG.csv`).
+
+The work uses the frozen code under `revision_r2/holdout/code/`, run through `revision_r2/holdout/reproduce/reproduce_unseen_seed42.py`.
+
+### 0. What you need
+- **The CERT r5.2 release folder.** It contains `logon.csv`, `device.csv`, `file.csv`, `email.csv` and `http.csv`. Below it is called `R52_RAW`.
+- **The CERT answers package folder.** It contains `insiders.csv` and the folders `r5.2-1` … `r5.2-4`. Below it is called `ANSWERS`.
+- **Python 3.11** and enough free disk for the intermediate Parquet files of step 3 (event-level, event-stream and daily tables). Plan for more than 20 GB in `WORK` and plenty of RAM: step 3 runs DuckDB with an 8 GB memory limit (set in `cert_common13_pipeline.py`) on top of Python's own use. In the independent test run, step 3 took about 1 h 50 min.
+- **A private work folder outside the clone.** Below it is called `WORK`. It will hold user IDs, tensors and checkpoints. Never commit or upload it.
+  - **`WORK` must not be the clone folder or any folder inside it.** Clone the repository somewhere else, for example `C:\Repro\teacher-guided-insider-threat-detection` with `WORK` = `C:\Repro\work`. `reproduce_unseen_seed42.py` refuses to run if `WORK` is inside the clone.
+
+In the commands below, replace `R52_RAW`, `ANSWERS` and `WORK` with full paths on your machine. The commands are for Windows PowerShell. On Linux or macOS, use `/` in paths, `\` instead of the backtick at line ends, and `export NAME=value` instead of `$env:NAME = "value"`.
+
+### 1. Clone
+```powershell
+git clone https://github.com/alriyami7777-alt/teacher-guided-insider-threat-detection.git
+cd teacher-guided-insider-threat-detection
+git checkout ieee-access-r2-revision
+```
+
+### 2. Fresh environment
+Windows PowerShell:
+```powershell
+py -3.11 -m venv .venv-r2
+.\.venv-r2\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu128
+```
+On Linux, use `python3.11 -m venv .venv-r2` and `source .venv-r2/bin/activate`, then the same `pip install` line. The pinned CUDA build of PyTorch also runs on a machine without a GPU, which is enough for the load route. macOS has no CUDA build: there, install `torch==2.11.0` from PyPI and the remaining lines of `requirements.txt`.
+
+On Windows 11 with **Smart App Control** turned on, Windows may block a DLL in the pinned `pyarrow` wheel, so `import pyarrow` fails. Smart App Control is a Windows security setting, not a problem with the repository. If you see this, use the Linux instructions inside WSL (for example Ubuntu 24.04 with Python 3.11). The CERT folders on the Windows drive are reachable there under `/mnt/c/...`.
+
+### 3. Build the day-level table from the raw CERT r5.2 files (CPU; the longest step)
+```powershell
+python revision_r2/holdout/data_prep/prepare_cert_common13_pipeline.py --dataset-version 5.2 `
+  --raw-dir "R52_RAW" --answers-dir "ANSWERS" `
+  --processed-dir "WORK\processed\r5.2" --output-dir "WORK\prep_reports" `
+  --stages match,label_events,unified_stream,daily_intervals,densify
+```
+- `--raw-dir` must be the folder that directly contains `logon.csv`, `device.csv`, `file.csv`, `email.csv` and `http.csv`.
+- If step 3 is interrupted, rerun it with `--stages` listing only the stage that stopped and the stages after it (order: `match`, `label_events`, `unified_stream`, `daily_intervals`, `densify`). Each stage deletes and rewrites its own output and reads the files of the stage before it.
+- `--processed-dir` must include a folder named `r5.2`; end it with `r5.2`, as shown. Otherwise the script stops with "must be under a 'r5.2' folder".
+- Do not use these folder names anywhere in the `WORK` path, because the script refuses to write into them: `objective2`, `objective3`, `baselines`, `sequence_ensemble`, `chapter4`, `v2`, `v3_fusion`, `v3_node`.
+- This step writes `WORK\processed\r5.2\interval_level\r52_user_day_intervals_dense.parquet`.
+- The `match` stage reads the answers package to label malicious events. That is the only use of answer-file content.
+- The scripts are the preparation pipeline used for the paper's data on 23 July 2026; see `revision_r2/holdout/data_prep/README.md` for their provenance. Step 6's `build` checks the result against the hashes of the paper's own tensors.
+
+### 4. Point the reproduction script at the data
+```powershell
+$env:R2_WORK = "WORK"
+$env:CERT_R52_DENSE = "WORK\processed\r5.2\interval_level\r52_user_day_intervals_dense.parquet"
+$env:CERT_R52_ANSWERS = "ANSWERS"
+cd revision_r2/holdout/reproduce
+python reproduce_unseen_seed42.py check
+```
+- `check` confirms that the published code matches the SHA-256 hashes recorded when it ran (`MODELS_FROZEN.json`, `phase4/MODELS_FROZEN_PHASE4.json`).
+- Two files show as `REDACTED`, as listed in `revision_r2/holdout/code/REDACTIONS.json`.
+
+### 5. Rebuild the pre-registered 1,500 / 500 user split
+```powershell
+python reproduce_unseen_seed42.py split
+```
+- Both lines should report `list_sha256 MATCHES SPLIT_RECEIPT.json`.
+- The split rule is in `revision_r2/holdout/PREREGISTRATION_R2_HOLDOUT.md`.
+- The user lists are written only to `WORK`.
+
+### 6a. Load route
+```powershell
+python reproduce_unseen_seed42.py build
+python reproduce_unseen_seed42.py score --route load
+```
+- `build` refits the scaler on the development users and rebuilds their TRAIN and VALIDATION tensors (CPU, about 1 GB of disk). It reports whether each tensor matches the hash recorded in `revision_r2/holdout/DATA_MANIFEST.json`. All six should match; a mismatch means step 3 produced a different day-level table.
+- `score` checks each checkpoint in `revision_r2/holdout/checkpoints_seed42/` against its frozen hash before use.
+
+### 6b. Retrain route (NVIDIA GPU required)
+```powershell
+python reproduce_unseen_seed42.py build
+python reproduce_unseen_seed42.py train
+python reproduce_unseen_seed42.py score --route retrain
+```
+Skip `build` if you already ran it in 6a. `train` runs the frozen recipe in this order:
+1. Three attention–linear precursors (seeds 42, 52, 62).
+2. Three teachers (T-OPT; TRACE is guided by all three).
+3. F00, TRACE and XGBoost-40 for seed 42.
+
+GPU training is not bit-for-bit deterministic, so retrained scores can differ slightly from the loaded ones. The nine runs took about 13 minutes on the authors' Windows machine and about 19 minutes in the independent test run under WSL on the same GPU.
+
+### 7. Output
+`WORK\results\unseen_users_seed42_<route>.csv` has one row per model. It gives:
+- the number of windows and positive windows;
+- PR-AUC (average precision over all windows of the 500 held-out users);
+- the decision threshold, with precision, recall and alerts per 1,000 windows at that threshold. In the load route this is each checkpoint's frozen threshold from `revision_r2/holdout/phase4/MODELS_FROZEN_PHASE4.json`. In the retrain route it is chosen again by the same frozen rule: the threshold with the highest F1 on the development users' VALIDATION windows (`threshold` in `revision_r2/holdout/code/phase2_runtime.py`). The two routes can therefore report different thresholds;
+- the number of held-out insiders and normal users;
+- how many insiders were detected (at least one positive window at or above the threshold);
+- how many normal users were flagged.
+
+### Notes
+- **Cohort definition:** the held-out cohort is the TRAIN and VALIDATION periods of the 500 users, built as in the paper's scoring script `revision_r2/holdout/code/phase4/score.py`.
+- **Frozen code is unchanged:** `reproduce_unseen_seed42.py` imports the frozen modules unchanged. It points their hard-coded Windows paths at `WORK` and refuses to run if a frozen module is loaded from outside the clone.
+- **Phase 3 explanation code:** published for reference in `revision_r2/explanation/code/`. It is not needed for this result.
+
+## Current architecture
+
+Input sequences are 20 days × 13 daily behavioural features.
+
+| Stage | Configuration |
+|---|---|
+| Temporal encoder | Single-layer bidirectional LSTM, hidden size 64 per direction, 128-dimensional temporal state |
+| Dropout | p = 0.2, after the Bi-LSTM hidden states and before temporal attention |
+| Temporal attention | Additive attention, hidden dimension 64 |
+| Tree head (ODST-046) | 2 layers × 4 trees per layer = 8 trees in total, depth 4, head dropout 0.0, sparsemax/sigmoid routing; routing temperature learned per tree and depth (see below) |
+| Second-layer input | 132 dimensions = 128 context dimensions + 4 first-layer tree outputs |
+| Readout | Mean of all 8 tree outputs before the sigmoid |
+
+**Routing temperature.** Each tree and depth has its own temperature, τ = softplus(ρ) + 10⁻⁴, learned with the rest of the head (`odst.py`). The constructor sets ρ = ln 0.5, which would give τ ≈ 0.41. When a teacher is built, however, `data_aware_initialize_from_batch` resets the thresholds and temperatures from one unlabelled training batch, and students start from their matched teacher. So the starting values are data-dependent, not 0.41. In the published seed-42 TRACE checkpoint the learned temperatures range from 0.013 to 0.069.
+
+The current eight-tree head is distinct from the sixteen-tree configuration in
+the historical July 2026 manuscript checkpoint. Both are valid frozen records of
+the stage that produced them.
+
+## Teacher-guided optimisation
+
+Students are trained on CERT r5.2 with seeds 42, 52 and 62 under
+`L = L_cls + 0.5·L_teacher + 0.5·L_route`, batch size 1024, encoder and
+attention learning rate 3e-5, and ODST learning rate 1e-3. The positive-class
+weight in `L_cls` is w₊ = 0.25 × N_neg / N_pos (Eq. 10), which is 49.535 on
+the r5.2 TRAIN windows. The unseen-user models recompute it on the 1,500
+development users' TRAIN windows (48.352).
+
+Component roles, as separated by the frozen factorial:
+
+- Teacher-informed initialisation remains an important optimisation condition.
+  Students trained from a random start did not recover under this protocol,
+  so TRACE starts from its matched teacher.
+- Ensemble-teacher prediction guidance, taken with equal weight from the three
+  frozen teachers, supplies the supported clean predictive improvement beyond
+  teacher-informed initialisation.
+- Matched-teacher route regularisation, in which the matched seed-specific
+  teacher supplies the route target, mainly constrains route drift and improves
+  structural and degraded-input behaviour.
+- ODST is an explanation-oriented differentiable head. Clean predictive
+  superiority over attention–linear was not established.
+
+Attention–linear remains a strong matched neural reference, and random forest
+and XGBoost remain strong engineered-tabular comparators.
+
+## Evidence streams
+
+- **CERT r4.2** — development evidence.
+- **CERT r5.2** — historical guarded-reference evidence, plus the final
+  train/validation evidence.
+- **CERT r5.1, r6.1 and r6.2** — zero-shot cross-release evaluation of models
+  trained on r5.2 (Section IV-M, Table 13; `revision_r2/phase5/`; r6.1 also in
+  `evidence/`).
+- **CERT r6.2** — additionally, exploratory training that includes r6.2:
+  pooled r5.2 + r6.2 and within-r6.2 training on user-grouped splits
+  (Section IV-M; `revision_r2/phase10/`, `revision_r2/phase11/`).
+
+## Key supported findings
+
+**Unseen users (pre-registered, confirmatory):** TRACE 0.712 vs task-only control 0.692 (+0.020 [0.008, 0.040]); XGBoost-40 0.824; TRACE found 24 of 25 insiders in each pre-registered seed (Section IV-C, Table 6).
+
+**Final CERT r5.2 validation (exploratory), mean over seeds 42, 52 and 62.**
+
+| Model | Mean validation PR-AUC |
+|---|---|
+| Teacher-initialised task-only ODST | 0.935324 |
+| Final teacher-guided, route-regularised ODST | 0.942842 |
+
+The difference is +0.007518, with a paired user-cluster 95% confidence interval
+of [0.000345, 0.018250]. This supports predictive value beyond teacher-informed
+initialisation. A route-only clean improvement is **not supported**, and clean
+superiority of ODST over attention–linear is **not supported**.
+
+**Dependence-aware confirmation.** On completed-window non-overlapping data at
+primary offset 0 (n = 4,000; 47 positives), the final model reached PR-AUC
+0.947970, with a median of 0.948755 across 20 offsets and performance above
+prevalence in 20 of 20 offsets. The principal ranking signal survives direct
+de-overlapping, while component-level contrasts become less certain: dependence
+concern resolved with qualification. Not all pairwise model differences were
+independently re-established.
+
+**Endpoint-defined evaluation.** Training used 788,000 sequences with 1,035
+positives across 84 users. Validation used 64,000 sequences with 140 positives
+across 24 users, at prevalence 0.0021875. The final full endpoint PR-AUC was
+0.651844, and the non-overlapping offset-0 endpoint PR-AUC was 0.571743
+(n = 4,000; 13 positives). This supports end-of-day detection and assessment. It
+does not establish causal detection, pre-event forecasting, or real-time
+intra-day prediction.
+
+**CERT r6.1 cross-release boundary.** On 1,988,000 windows with 190 positives,
+at prevalence 9.557344e-05, the final model reached PR-AUC 9.445740e-05. Ranking
+transfer to CERT r6.1 is **not supported**: the prospectively reserved
+cross-release evaluation exposed limited transfer to CERT r6.1 despite strong
+r5.2 validation performance. The route-structural result remains supported and
+does not imply predictive transfer.
+
+## IEEE Access revision R2 (Access-2026-42960): where every result lives
+
+This section maps every analysis reported in the paper to its files.
+
+| Paper result | Frozen source (branch @ commit : path) | Copy in this branch |
 |---|---|---|
-| Objective 1: develop time-aware preprocessing that preserves inactivity and behavioural chronology | `src/preprocessing`, `protocols/objective1_*` | Phase 1: data preparation and temporal representation |
-| Objective 2: develop and evaluate a unified differentiable sequence–ensemble architecture | `src/models`, `src/training`, `src/evaluation`, `protocols/objective2_*` | Phase 2: model development and comparative evaluation |
-| Objective 3: assess explanation evidence and robustness under controlled conditions | `src/explainability`, `src/robustness`, `protocols/objective3_*` | Phase 3: explainability and robustness assessment |
+| r5.2 validation factorial (Table 5; component contrasts in Section IV-E) | `editor012-teacher-anchor-rescue` @ `4bcf522` : `review/editor012_teacher_anchor_rescue/` | `results/tables/r52_validation_all_models.csv`; the earlier ten-seed validation extension, not reported in the R2 manuscript, is kept in `results/tables/ten_seed_extension_extra_seeds.csv` |
+| Formulation search before the factorial (8 candidates) | same : `01_inner_anchor_search/` | `results/tables/formulation_search_editor012_inner.csv` |
+| XGBoost-40 / RF-40 on the same r5.2 validation partition | `editor015-residual-complementarity` @ `d8e1d04` : `review/editor007a_post006e_diagnostics/EDITOR007A_R52_VALIDATION_PARITY.csv` | `results/tables/r52_validation_all_models.csv` |
+| CERT r5.1 and r6.2, historical frozen pre-TA2 family (Table 13 itself uses TRACE: `revision_r2/phase5/`) | same : `review/editor007d_cross_version_synthesis/` | `results/tables/cross_version_r51_r62_frozen_family.csv` |
+| Non-overlapping and endpoint analyses | `editor029-endpoint-dependence-aware` @ `28475d5` : `review/editor029_endpoint_dependence/` | `evidence/` (redacted export) |
+| CERT r6.1 cross-release | `editor024-r61-final-confirmation` @ `23794a7` : `review/editor024_r61_final_confirmation/` | `evidence/` (redacted export) |
+| Explanation and degraded-input analyses | `editor017-…` @ `c75321a`, `editor023-…` @ `a480fa2` | `evidence/` (redacted export) |
+| User-disjoint untouched holdout (pre-registered) | new, see `revision_r2/` | `revision_r2/holdout/` |
 
-## Architecture
+- **Disclosures** of results and selection steps that the submitted manuscript did not report: `revision_r2/DISCLOSURES.md`.
+- **Claim-to-evidence matrix:** `review/CLAIM_EVIDENCE_MATRIX.csv`.
+- **Pinned environment:** `requirements.txt`, `revision_r2/ENVIRONMENT.md`.
+- **CERT user identifiers** (synthetic, from the public CERT generator) are pseudonymised in the `evidence/` export: each identifier is replaced consistently by `U_` + the first 10 hex characters of its SHA-256. This is pseudonymisation, not irreversible anonymisation. `evidence/EXPORT_MANIFEST.csv` records the SHA-256 of every original and exported file, so each exported file can be matched to its frozen original. Binary arrays, predictions and checkpoints are listed but not published.
+- **Historical branches.** `editor015-residual-complementarity` is a superseded working branch, kept unchanged for transparency.
 
-The planned and evaluated architecture uses:
+## Key limitations
 
-1. 20-day sequences;
-2. 13 daily behavioural features;
-3. a bidirectional long short-term memory encoder;
-4. temporal attention;
-5. a differentiable tree head;
-6. a binary insider-threat prediction output.
+- CERT r5.2 temporal partitions contain the same users. Unseen-user generalisation
+  is tested only by the R2 pre-registered user-disjoint holdout (`revision_r2/`).
+- Explanation support is bounded. The local signed reference-centred
+  tree-contribution intervention is supported. Routes, reached leaves, tree
+  outputs and memberships are traceable internal evidence only. General global
+  top-k tree-ranking faithfulness is not supported.
+- Missing-source and Gaussian-noise experiments are controlled degraded-input
+  and data-quality sensitivity analyses, not adversarial robustness experiments.
+  Local evasion and poisoning attacks are reported separately (Section IV-K,
+  Table 11; `revision_r2/phase9/`).
+- Overlapping sequence windows are correlated observations.
 
-Teacher anchoring is used during training. The student model remains independent at inference.
-
-## Evidence status
-
-### Completed evidence
-
-- CERT r4.2 feasibility and architecture-development experiments.
-- CERT r5.2 one-pass independent testing for eligible baselines and the frozen-encoder ODST comparator.
-- CERT r5.2 teacher-anchored train/validation reproducibility across seeds 42, 52, and 62.
-- Same-information attentionâ€“linear and ODST comparisons.
-- Explanation and degraded-input portability analyses on CERT r5.2, with documented limitations.
-- ODST component-latency and reduced-tree viability audits.
-- CERT r6.2 model-free readiness, provenance, ground-truth package audit, exact-matching strategy, and Stage 2B-1A logon matching.
-
-### Qualified findings
-
-- Teacher anchoring currently supports stabilisation and reproducibility rather than a substantial performance improvement.
-- ODST explanation evidence is supported under the documented reference-centred procedure and carries sensitivity limits.
-- Missing-source experiments are controlled source-channel ablations rather than complete operational deployment simulations.
-- The final teacher-anchored student has not yet been claimed as independently tested on CERT r6.2.
-
-### Planned experiments
-
-- Any outstanding independent evaluation of the final teacher-anchored student.
-- Preregistered CERT r6.2 model stress testing.
-- Larger GPU experiments after return to Malaysia.
+See `KNOWN_LIMITATIONS.md` for the complete list.
 
 ## Repository map
 
-- `STATUS.md` â€” current evidence classification.
-- `REPRODUCIBILITY.md` â€” reproducibility requirements.
-- `DATA_AVAILABILITY.md` â€” dataset restrictions and expected local layout.
-- `KNOWN_LIMITATIONS.md` â€” protocol and interpretation limits.
-- `protocols/` â€” objective-linked experimental protocols.
-- `manifests/` â€” experiment registry and result provenance.
-- `results/tables/` â€” compact manuscript-facing result tables.
-- `src/` and `scripts/` â€” reviewed implementation only.
+- `docs/IEEE_ACCESS_RESUBMISSION_FREEZE_2026-08-25.md` — current resubmission freeze record.
+- `STATUS.md` — current evidence classification.
+- `REPRODUCIBILITY.md` — reproducibility requirements.
+- `DATA_AVAILABILITY.md` — dataset restrictions and expected local layout.
+- `KNOWN_LIMITATIONS.md` — protocol and interpretation limits.
+- `protocols/` — experimental protocols for the analyses reported in the paper.
+- `manifests/` — experiment registry and result provenance.
+- `paper/manuscript/` — historical manuscript checkpoint, retained unchanged.
+- `results/tables/` — compact manuscript-facing result tables.
+- `src/` and `scripts/` — reviewed implementation only.
 
 ## Important interpretation rule
 
-Results in this repository must be labelled as **completed**, **preliminary or qualified**, **planned**, or **final conclusion**. Planned experiments must not be written as completed evidence.
+Interpret results according to their recorded evidence role: development,
+historical guarded-test, final validation, sensitivity, or cross-release
+evidence. Each result must carry that role explicitly, and roles must not be
+substituted for one another.
 
 ## Local setup
 
@@ -85,5 +305,4 @@ See `SETUP_WINDOWS.md`.
 
 ## Licence
 
-The initial repository uses a temporary all-rights-reserved notice. A public open-source licence should be selected only after the code and data-sharing position have been reviewed.
-
+Code and documentation: MIT (see `LICENSE`). The CERT Insider Threat datasets are **not** redistributed here; they remain subject to their providers' terms.

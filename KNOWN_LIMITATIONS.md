@@ -1,10 +1,12 @@
 # Known Limitations
 
-1. The final teacher-anchored student must not be described as independently validated on a dataset or split unless that exact evaluation has been completed and locked.
-2. CERT r5.2 one-pass test evidence applies to the eligible baselines and frozen-encoder comparator under the recorded protocol.
-3. Teacher-anchored r5.2 results currently represent train/validation reproducibility evidence.
-4. Reference-centred ODST explanation evidence is supported with sensitivity limits; raw-ranking results are retained as a negative or qualified finding.
-5. Missing-source experiments are source-channel ablations and do not reproduce every operational consequence of unavailable event sources.
-6. Runtime does not scale directly with ODST tree count under the current implementation.
-7. CERT r6.2 work through Stage 1F is a model-free readiness and provenance audit, not a model-performance result.
-8. Dataset-specific feature and source dependencies limit direct generalisation across CERT releases.
+1. CERT activity is synthetic; results on real organisational logs may differ.
+2. Public datasets contain few insiders (25 held-out insiders in the unseen-user test; six positive users in the r4.2 test), which limits statistical power for every model.
+3. No analyst study of the alerts has been made.
+4. TRACE did not transfer zero-shot to CERT r6.1 or r6.2; a new release needs labelled data of its own and revalidation (Section IV-M).
+5. Explanation faithfulness is supported locally (day, feature, tree and route interventions), not as a global tree ranking; the global top-k tree-ranking test was negative.
+6. The early-warning result is measured from a known first malicious day, so it is retrospective.
+7. Like other neural detectors, TRACE can be misled by an attacker with full access to its gradients; this requires access to the deployed model, so its parameters should be protected like any security control.
+8. Overlapping windows are correlated observations, and endpoint labels support end-of-day detection, not real-time intra-day prediction.
+
+Earlier limitation statements that applied to the August 2026 resubmission are superseded by the R2 unseen-user, r6.2 and route-intervention results.
